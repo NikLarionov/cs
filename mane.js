@@ -24,8 +24,8 @@ const api = axios.create({
 let getLastRes = async (n = 30) => {
     try {
         let res = await api.get('/current-state')
-        let cookie = res.headers.set-cookie
-        console.log(cookie)
+        let ck = res.headers['set-cookie'][0].split(';')[0]
+        api.defaults.headers['Cookie'] = ck
         let hist = res.data.data.game.history
         if (n > 30) {
             console.log(n)
@@ -44,7 +44,7 @@ let getLastRes = async (n = 30) => {
     }
 }
 
-getLastRes(30).then(e => {
+getLastRes(300).then(e => {
     console.log(e)
     console.log(e.length)
 }).catch(console.error)
