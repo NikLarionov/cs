@@ -1,0 +1,22 @@
+{
+  "name": "cs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "mane.js ",
+  "scripts": {
+    "test": "node mane.js "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hedonist666/cs.git"
+  },
+  "author": "Valentina Karnauhova",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hedonist666/cs/issues"
+  },
+  "homepage": "https://github.com/hedonist666/cs#readme",
+  "dependencies": {
+    "axios": "^0.19.2"
+  }
+}
