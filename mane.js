@@ -1,9 +1,12 @@
 const axios = require('axios')
-//const cheerio = require('cheerio')
+const cheerio = require('cheerio')
 const fs      = require('fs')
+const Promise = require('bluebird')
 
+let concur = 1
+let ms     = 500
 let log = fs.createWriteStream('res.txt')
-const addr = 'https://api.csgorun.org'
+let addr = 'https://api.csgorun.org'
 
 const AGENTS = [
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
@@ -14,6 +17,10 @@ const AGENTS = [
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:59.0) Gecko/20100101 Firefox/59.0',
   'Mozilla/5.0 (Windows NT 6.3; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0'
 ];
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
 
 const cs = axios.create({
     baseURL: 'https://csgorun.ru/',
@@ -41,14 +48,6 @@ const api = axios.create({
 let getLastRes = async (n = 30) => {
     let i = n
     let hist = []
-    let add = async () => {
-        let res = await api.get(`/games/${i}`)
-        let info = res.data
-        let e = {id: info.data.id, crash: info.data.crash}
-        hist.push(e)
-        log.write(JSON.stringify(e) + "\n")
-        --i;
-    }
     try {
         let res = await api.get('/current-state')
         console.log('connected to host')
@@ -58,18 +57,30 @@ let getLastRes = async (n = 30) => {
         */
         hist = res.data.data.game.history
         hist.forEach(e => {
-            log.write(JSON.stringify(e) + "\n")
+            log.write(JSON.stringify(e) + ",\n")
         })
         if (n > 30) {
             n -= 30
-            console.log(n)
-            let lastIdx = hist[hist.length - 1].id
-            setInterval(add, 500)
-            while (i > lastIdx - n) {
-                await sleep(1000)
-            }
+            let lastIdx = hist[hist.length - 1].id - 1
+            let ids = Array.from(Array(n), (_, i) => lastIdx - i)
+            Promise.map(ids, id => {
+                console.log(`requesting /games/${id}`)
+                /*
+                let data = api.get(`/games/${id}`)
+                console.log(`data of ${id}: ${data}`)
+                return {id: data.id, crash: data.crash}
+                */
+                return delay(ms).then(() => {return api.get(`/games/${id}`)})
+            }, {concurrency: concur})
+                .then(games => {
+                    games.forEach(e => {
+                        let info = {id: e.data.data.id, crash: e.data.data.crash}
+                        console.log(info)
+                        log.write(JSON.stringify(info) + ",\n")
+                        hist.push(info)
+                    })
+                })
         }
-        log.end()
         return hist
     }
     catch (e) {
