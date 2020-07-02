@@ -2,9 +2,9 @@
   "name": "cs",
   "version": "1.0.0",
   "description": "",
-  "main": "mane.js ",
+  "main": "index.js",
   "scripts": {
-    "test": "node mane.js "
+    "test": "node mane.js"
   },
   "repository": {
     "type": "git",
