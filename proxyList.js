@@ -2,6 +2,7 @@ const axios     = require('axios')
 const tunnel    = require('tunnel')
 const cheerio   = require('cheerio')
 const fs        = require('fs')
+const qs        = require('querystring')
 
 
 const AGENTS = [
@@ -67,7 +68,11 @@ let spysOne = () => {
 //xx0=383b00898ac5d1006a96b0640df507f7&xpp=5&xf1=0&xf2=0&xf4=0&xf5=2
     let hdrs = browserHeaders()
     axios.get(addr, {
-        headers: hdrs
+        headers: hdrs,
+        proxy: {
+            host: '127.0.0.1',
+            port: 8080
+        }
     }).then(resp => {
         let $ = cheerio.load(resp.data)
         let val = $('input[name="xx0"]').val()
@@ -77,18 +82,16 @@ let spysOne = () => {
         hdrs['Referer'] = 'http://spys.one/en/socks-proxy-list/'
         hdrs['Content-Type'] = 'application/x-www-form-urlencoded'
         hdrs['host'] = 'spys.one' 
+        let data = {xx0: val, xpp: "5", xf1: "0", xf2: "0", xf4: "0", xf5: "2"}
         return axios({
             method: 'post',
             url: addr,
             headers: hdrs,
-            data: {
-                xx0: val,
-                xpp: "5",
-                xf1: "0",
-                xf2: "0",
-                xf4: "0",
-                xf5: "2"
-            }
+            data: qs.stringify(data),
+            proxy: {
+                host: '127.0.0.1',
+                port: 8080
+            },
         })
     }).then(resp => {
         fs.writeFile('response.html', resp.data, _ => console.log('wrote file'))
@@ -99,6 +102,9 @@ let spysOne = () => {
         console.log(vars)
         $('.spy1x, .spy1xx').each(function (idx) {
             let ip = $(this).find('td').first().text()
+            if (match = /(\d+\.\d+\.\d+\.\d+).*/.exec(ip)) {
+                ip = match[1]
+            }
             let scr = $(this).find('script').first().html()
             if (!scr) return;
             let port = scr.slice(0, scr.length - 1).split('+').slice(1).map(e => eval(e).toString()).join('')

@@ -19,6 +19,8 @@
   "dependencies": {
     "axios": "^0.19.2",
     "bluebird": "^3.7.2",
-    "cheerio": "^1.0.0-rc.3"
+    "cheerio": "^1.0.0-rc.3",
+    "querystring": "^0.2.0",
+    "tunnel": "0.0.6"
   }
 }

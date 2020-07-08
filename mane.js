@@ -1,12 +1,14 @@
-const axios = require('axios')
-const cheerio = require('cheerio')
-const fs      = require('fs')
-const Promise = require('bluebird')
+const axios         = require('axios')
+const cheerio       = require('cheerio')
+const fs            = require('fs')
+const Promise       = require('bluebird')
+const {proxyList}   = require('./proxyList.js')
+const tunnel        = require('tunnel')
 
-let concur = 1
-let ms     = 500
-let log = fs.createWriteStream('res.txt')
-let addr = 'https://api.csgorun.org'
+let concur  = 50
+let ms      = 50
+let log     = {}
+let addr    = 'https://api.csgorun.org'
 
 const AGENTS = [
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
@@ -40,21 +42,26 @@ const api = axios.create({
         'If-None-Match': 'W/"393c-Mc/oG3InxbtaVRqsm0PeYj9yntQ"'
     },
     withCredentials: true
-//Cookie: __cfduid=d16b0929dc78b817b15b4e38328e57b851593501834
 })
 
+let getAgent = (lst) => {
+    let randNode = lst[Math.floor(Math.random()*lst.length)]
+    return tunnel.httpsOverHttp({
+        proxy: {
+            host: randNode.ip,
+            port: randNode.port
+        }
+    })
+}
 
 
 let getLastRes = async (n = 30) => {
+    let lst = await proxyList(true)
     let i = n
     let hist = []
     try {
-        let res = await api.get('/current-state')
+        let res = await api.get('/current-state', {httpsAgent: getAgent(lst)})
         console.log('connected to host')
-        /*
-        let ck = res.headers['set-cookie'][0].split(';')[0]
-        api.defaults.headers['Cookie'] = ck
-        */
         hist = res.data.data.game.history
         hist.forEach(e => {
             log.write(JSON.stringify(e) + ",\n")
@@ -65,12 +72,7 @@ let getLastRes = async (n = 30) => {
             let ids = Array.from(Array(n), (_, i) => lastIdx - i)
             Promise.map(ids, id => {
                 console.log(`requesting /games/${id}`)
-                /*
-                let data = api.get(`/games/${id}`)
-                console.log(`data of ${id}: ${data}`)
-                return {id: data.id, crash: data.crash}
-                */
-                return delay(ms).then(() => {return api.get(`/games/${id}`)})
+                return delay(ms).then(() => {return api.get(`/games/${id}`, {httpsAgent: getAgent(lst)})})
             }, {concurrency: concur})
                 .then(games => {
                     games.forEach(e => {
@@ -90,6 +92,7 @@ let getLastRes = async (n = 30) => {
 
 
 if (require.main === module) {
+    log = fs.createWriteStream('res.txt')
     if (process.argv[2]) {
         console.log(`requesting ${process.argv[2]} games`)
         getLastRes(parseInt(process.argv[2])).then(e => {
