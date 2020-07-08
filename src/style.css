@@ -1,0 +1,73 @@
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    overflow: hidden;
+}
+
+.wraper {
+    height: 100%;
+}
+
+.input {
+    text-align: center;
+/*    width: 250px; */
+    height: 100%; 
+    border: 5px solid black;
+    margin: 0;
+    overflow: scroll;
+}
+
+.type {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.input form {
+    margin-top: auto;
+}
+
+.custom input {
+    margin: auto;
+}
+
+.checkbox {
+    text-align: left;
+}
+
+.res {
+    text-align: center;
+    width: 200px;
+    height: 100%;
+    border: 5px solid black;
+    border-left: 0px;
+    padding: 0;
+}
+
+.header {
+    height: 50px;
+    width: 100%;
+    background: black;
+    color: white;
+}
+
+.header p {
+    margin: 0;
+    vertical-align: middle;
+}
+
+#counter {
+    border: 2px solid black;
+    border-left: 0;
+    margin-bottom: 0;
+}
+
+#mesbox {
+    text-align: left;
+    overflow: scroll;
+    height: 750px;
+    font-size: 13px;
+    padding-left: 10px;
+}

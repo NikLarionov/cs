@@ -1,5 +1,2 @@
 node_modules
-package-lock.json 
-scr.sh
-materials
-res.txt
+out
