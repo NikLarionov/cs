@@ -69,10 +69,6 @@ let spysOne = () => {
     let hdrs = browserHeaders()
     axios.get(addr, {
         headers: hdrs,
-        proxy: {
-            host: '127.0.0.1',
-            port: 8080
-        }
     }).then(resp => {
         let $ = cheerio.load(resp.data)
         let val = $('input[name="xx0"]').val()
@@ -88,10 +84,6 @@ let spysOne = () => {
             url: addr,
             headers: hdrs,
             data: qs.stringify(data),
-            proxy: {
-                host: '127.0.0.1',
-                port: 8080
-            },
         })
     }).then(resp => {
         fs.writeFile('response.html', resp.data, _ => console.log('wrote file'))
