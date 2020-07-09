@@ -32,15 +32,7 @@ let getFreeProxyListNet = (tls = false) => {
     let freeProxyListNet = 'https://free-proxy-list.net/'
     console.time('requesting proxy list')
     return axios.get(freeProxyListNet, {
-        headers: {
-            'User-Agent': AGENTS[Math.floor(Math.random()*AGENTS.length)],
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
-            'Connection': 'close',
-            'Upgrade-Insecure-Requests': '1',
-            'If-None-Match': 'W/"393c-Mc/oG3InxbtaVRqsm0PeYj9yntQ"'
-        } 
+        headers: browserHeaders()
     }).then(resp => {
         console.timeEnd('requesting proxy list')
         fs.writeFile('resp.html', resp.data, _ => console.log('wrote file resp.html'))
@@ -108,15 +100,18 @@ let spysOne = () => {
         
 }
 
-let proxyList = async (tls = false, n) => {
+let httpsList = async (tls = false, n) => {
     return getFreeProxyListNet(tls)
 }
 
+let socksList = async () => {
+    return spysOne()
+}
 
 if (require.main === module) {
-    spysOne()
+    socksList()
 }
 else {
-    module.exports.getFreeProxyListNet = getFreeProxyListNet
-    module.exports.proxyList = proxyList
+    module.exports.httpsList = httpsList
+    module.exports.socksList = socksList
 }
