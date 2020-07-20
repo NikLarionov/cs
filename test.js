@@ -26,29 +26,26 @@ mane.api.get('/current-state').then(resp => {
     })
     ws.on('message', mes => {
         wsLog.write('$' + mes)
-        let elems = mes.split('\n')
-        let data = mes
-        if (elems.length > 2) {
-            data = elems[0]
-        }
-        data = JSON.parse(data)
-        let result = data.result
-        if (data.id === 1) {
-            client = result.client
-            ws.send(JSON.stringify({
-                method: 1,
-                params: {
-                    channel: "game"
-                },
-                id: 2
-            }))
-        }
-        else if (!data.id){
-            let game = result.data.data
-            if (game.type === 'c') {
-                console.log(game.c)
+        let messages = mes.split('\n').filter(e => e !== '').map(e => JSON.parse(e))
+        messages.forEach(data => {
+            let result = data.result
+            if (data.id === 1) {
+                client = result.client
+                ws.send(JSON.stringify({
+                    method: 1,
+                    params: {
+                        channel: "game"
+                    },
+                    id: 2
+                }))
             }
-        }
+            else if (!data.id){
+                let game = result.data.data
+                if (game.type === 'c') {
+                    console.log(game.c)
+                }
+            }
+        })
     })
     ws.on('error', console.error)
 })
