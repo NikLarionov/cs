@@ -43,6 +43,23 @@ const api = axios.create({
 //Cookie: __cfduid=d16b0929dc78b817b15b4e38328e57b851593501834
 })
 
+const profile = axios.create({
+//    GET /profile/76561198250071752 HTTP/1.1
+    baseURL: 'https://csgorun.org/profile',
+    timeout: 10000,
+    headers: {
+        'User-Agent': AGENTS[Math.floor(Math.random()*AGENTS.length)],
+        'Host': 'csgorun.org',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate',
+        'Connection': 'close',
+        'Referer': 'https://csgorun.org/',
+        'Cookie': '__cfduid=d16b0929dc78b817b15b4e38328e57b851593501834',
+        'Upgrade-Insecure-Requests': 1
+    }
+})
+
 
 
 let getLastRes = async (n = 30) => {
@@ -105,4 +122,7 @@ if (require.main === module) {
 }
 else {
     module.exports.getLastRes = getLastRes
+    module.exports.api = api
+    module.exports.cs = cs
+    module.exports.profile = profile
 }
