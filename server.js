@@ -110,6 +110,17 @@ let getLastRes = async (n = 30) => {
     }
 }
 
+let makeBet = async (token, items, cashout) => {
+    return api.post('/make-bet', {
+        headers: {
+            'Authorization': 'JWT ' + token
+        },
+        data: {
+            userItemIds: items,
+            auto: cashout
+        }
+    })
+}
 
 if (require.main === module) {
     if (process.argv[2]) {
