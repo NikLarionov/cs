@@ -20,6 +20,9 @@
     "axios": "^0.19.2",
     "bluebird": "^3.7.2",
     "cheerio": "^1.0.0-rc.3",
+    "http-mitm-proxy": "^0.8.2",
+    "http-proxy": "^1.18.1",
+    "selenium-webdriver": "^4.0.0-alpha.7",
     "ws": "^7.3.1"
   }
 }

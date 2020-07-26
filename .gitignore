@@ -3,5 +3,7 @@ package-lock.json
 scr.sh
 materials
 res.txt
+res.js
 out
 *.html
+.http-mitm-proxy/
