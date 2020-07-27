@@ -5,6 +5,7 @@ const cheerio       = require('cheerio')
 const fs            = require('fs')
 const Promise       = require('bluebird')
 const realTime      = require('./realTime.js')
+const auth          = require('./auth.js')
 
 let concur = 1
 let ms     = 500
@@ -110,10 +111,12 @@ let getLastRes = async (n = 30) => {
     }
 }
 
-let makeBet = async (token, items, cashout) => {
-    return api.post('/make-bet', {
+/* BAD FUNCTIONS */
+let betReq = async (token, items, cashout) => {
+    return api('/make-bet', {
+        method: 'post',
         headers: {
-            'Authorization': 'JWT ' + token
+            'Authorization': token
         },
         data: {
             userItemIds: items,
@@ -121,8 +124,18 @@ let makeBet = async (token, items, cashout) => {
         }
     })
 }
+let makeBet = (items, cashout) => {
+    if (auth.token) {
+        return betReq(auth.token, items, cashout)
+    }
+    else {
+        auth.getToken(api, token => {
+            return betReq(token, items, cashout)
+        })
+    }
+}
 
-if (require.main === module) {
+function main() {
     if (process.argv[2]) {
         console.log(`requesting ${process.argv[2]} games`)
         getLastRes(parseInt(process.argv[2])).then(e => {
@@ -135,6 +148,19 @@ if (require.main === module) {
             }    
         }).catch(console.error)
     }
+}
+
+
+if (require.main === module) {
+    let token = 'JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAwMTA1LCJpYXQiOjE1OTU3ODE5NzksImV4cCI6MTYwMDk2NTk3OX0.X25xyCaaXy_CpMEs1pWkrhu0c4VkwJAieRFzQt2ntlk'
+    api.get('/current-state', {
+        headers: {
+            Authorization: token
+        }
+    }).then(resp => {
+        console.log(resp.data.data.user.items)
+    })
+    betReq(token, [188908280], '1.1').then(console.log).catch(console.error)
 }
 else {
     module.exports.getLastRes = getLastRes

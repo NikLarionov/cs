@@ -4,13 +4,12 @@ const proxy        = require('selenium-webdriver/proxy')
 const https        = require('https')
 const http         = require('http')
 const MITM         = require('http-mitm-proxy')
-const {api}        = require('./server.js')
 
 
+let token = {}
 
 let getToken = (api, cb) => {
     let authUrl
-    let token
     let driver = new webdriver.Builder()
         .withCapabilities(webdriver.Capabilities.firefox().setAcceptInsecureCerts(true))
         .setProxy(proxy.manual({https: 'localhost:8081'}))
@@ -53,4 +52,5 @@ let getToken = (api, cb) => {
     startAuth()
 }
 
-module.exrpots.getToken = getToken
+module.exports.getToken = getToken
+module.exports.token = token
