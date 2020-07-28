@@ -8,7 +8,6 @@ const realTime      = require('./realTime.js')
 const auth          = require('./auth.js')
 
 let concur = 1
-let ms     = 500
 let log = fs.createWriteStream('res.txt')
 let addr = 'https://api.csgorun.org'
 
@@ -64,23 +63,21 @@ const profile = axios.create({
     }
 })
 
-/*
-let ck = res.headers['set-cookie'][0].split(';')[0]
-api.defaults.headers['Cookie'] = ck
-*/
-
-
-let getLastRes = async (n = 30) => {
+let getLastRes = async (event, n, ms, trace=false) => {
     let i = n
+    let idx = 0
     let hist = []
     try {
         let res = await api.get('/current-state')
         console.log('connected to host')
         let token = res.data.data.centrifugeToken
-        realTime.traceGames(token, console.log)
+        if (trace) realTime.traceGames(token, e => event.reply('message', {id: '_', txt: e, start: true}))
+        event.reply('message', 'connected to host')
         hist = res.data.data.game.history
         hist.forEach(e => {
-            log.write(JSON.stringify(e) + ",\n")
+            event.reply('message', {id: e.id, txt: e.crash, start: false})
+            log.write(JSON.stringify(e.crash) + "\n")
+            ++idx; event.reply('count', idx); 
         })
         if (n > 30) {
             n -= 30
@@ -88,25 +85,26 @@ let getLastRes = async (n = 30) => {
             let ids = Array.from(Array(n), (_, i) => lastIdx - i)
             Promise.map(ids, id => {
                 console.log(`requesting /games/${id}`)
-                /*
-                let data = api.get(`/games/${id}`)
-                console.log(`data of ${id}: ${data}`)
-                return {id: data.id, crash: data.crash}
-                */
+                ++idx; event.reply('count', idx); 
                 return delay(ms).then(() => {return api.get(`/games/${id}`)})
             }, {concurrency: concur})
                 .then(games => {
                     games.forEach(e => {
                         let info = {id: e.data.data.id, crash: e.data.data.crash}
                         console.log(info)
-                        log.write(JSON.stringify(info) + ",\n")
+                        event.reply('message', {id: info.id, txt: info.crash, start: false})
+                        log.write(info.crash + "\n")
                         hist.push(info)
                     })
+                }).catch(e => {
+                    console.error(e)
+                    event.reply('error', e)
                 })
         }
         return hist
     }
     catch (e) {
+        event.reply('error', e)
         console.error(e)
     }
 }
@@ -167,4 +165,5 @@ else {
     module.exports.api = api
     module.exports.cs = cs
     module.exports.profile = profile
+    module.exports.log = log
 }

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>csgorun.ru bot</title>
+    <link rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="./style.css">
+  </head>
+  <body>
+      <div class="row wraper">
+      <div class="input col-4">
+          <form action="send(event)" name="ipcForm" class="form" onSubmit="send(event)">
+              <div class="type">
+                  <label for="num">Number of games</label>
+                  <p><input type="text" class="custom form-control" id="num" value="100"></p>
+              </div>
+              <div class="type">
+                  <label for="ms">Delay for request (in ms)</label>
+                  <p><input type="text" class="form-control" id="ms" value="100"></p>
+              </div>
+              <div class="type">
+                  <label for="fn">File name for result</label>
+                  <p><input type="text" class="form-control" id="fn" value="res.txt"></p>
+              </div>
+              <p class="checkbox"><input type="checkbox" value="true">UPDATE</p>
+              <div class="type">
+                  <button class="btn btn-primary" type="submit" id="subm">Scan games</button>
+              </div>
+          </form>
+          <div class="colors">
+              <p>ADD A COLOR FILTER <button id="addColor" class="btn btn-sm btn-outline-primary">+</button> 
+          </div>
+      </div>
+      <div class="res col-8">
+          <div class="header">
+            <p style="vertical-align: sub">MESSAGE BOX</p>
+          </div>
+          <p id="counter"></p>
+          <div id="mesbox"></div>
+      </div>
+      </div>
+      <script src='./renderer.js'></script>
+  </body>
+</html>
