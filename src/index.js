@@ -35,10 +35,10 @@ const createWindow = () => {
   });
 };
 
-ipcMain.on('form-submission', function (event, n, ms, fn) {
+ipcMain.on('form-submission', function (event, n, ms, fn, update=false) {
     console.log(n, ms, fn)
     domath.log = fs.createWriteStream(fn)
-    domath.getLastRes(event, parseInt(n), parseInt(ms)).then(e => {
+    domath.getLastRes(event, parseInt(n), parseInt(ms), update).then(e => {
     }).catch(console.error)
 
 });

@@ -10,6 +10,7 @@ const auth          = require('./auth.js')
 let concur = 1
 let log = fs.createWriteStream('res.txt')
 let addr = 'https://api.csgorun.org'
+let lastGames = []
 
 const AGENTS = [
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
@@ -71,7 +72,10 @@ let getLastRes = async (event, n, ms, trace=false) => {
         let res = await api.get('/current-state')
         console.log('connected to host')
         let token = res.data.data.centrifugeToken
-        if (trace) realTime.traceGames(token, e => event.reply('message', {id: '_', txt: e, start: true}))
+        if (trace) realTime.traceGames(token, e => {
+            lastGames.push(e)
+            event.reply('message', {id: '_', txt: e, start: true})
+        })
         event.reply('message', 'connected to host')
         hist = res.data.data.game.history
         hist.forEach(e => {
@@ -166,4 +170,7 @@ else {
     module.exports.cs = cs
     module.exports.profile = profile
     module.exports.log = log
+    module.exports.lastGames = lastGames
+
+
 }

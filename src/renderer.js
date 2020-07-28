@@ -3,6 +3,7 @@ const ipcRenderer = require('electron').ipcRenderer;
 let promptTxt = '>>> '
 
 let args = ['#num', '#ms', '#fn'].map(e => document.querySelector(e))
+let update = document.getElementById('update')
 let button = document.querySelector('#subm')
 let counter = document.querySelector('#counter')
 let mesBox  = document.querySelector('#mesbox')
@@ -145,7 +146,7 @@ function send() {
         alert('Bad Arguments ;(')
         return
     }
-    ipcRenderer.send('form-submission', args[0], args[1], args[2])
+    ipcRenderer.send('form-submission', args[0], args[1], args[2], update.value === 'true' ? true : false)
 }
 
 

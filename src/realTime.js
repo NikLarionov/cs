@@ -12,7 +12,6 @@ let traceGames = (token, cb) => {
     let wsLog = fs.createWriteStream('wsLog.json')
     let addr = 'https://ws.csgorun.org/connection/websocket'
     let ws   = new WS(addr)
-    let cilent
     ws.on('open', () => {
         console.log('connected to host')
         ws.send(JSON.stringify({
@@ -28,7 +27,7 @@ let traceGames = (token, cb) => {
         messages.forEach(data => {
             let result = data.result
             if (data.id === 1) {
-                client = result.client
+                //client = result.client
                 ws.send(JSON.stringify({
                     method: 1,
                     params: {
