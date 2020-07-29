@@ -47,6 +47,8 @@ ipcMain.on('form-submission', function (event, n, ms, fn, update=false) {
 ipcMain.on('auth', event => {
     auth.getToken(server.api, token => {
         event.reply('message', 'got token' + token)
+        event.reply('authDone')
+        event.reply('token', token)
     }) 
 })
 

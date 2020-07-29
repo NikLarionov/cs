@@ -3,10 +3,11 @@ const ipcRenderer = require('electron').ipcRenderer;
 let promptTxt = '>>> '
 
 let args = ['#num', '#ms', '#fn'].map(e => document.querySelector(e))
-let update = document.getElementById('update')
-let button = document.querySelector('#subm')
+let update  = document.getElementById('update')
+let button  = document.querySelector('#subm')
 let counter = document.querySelector('#counter')
 let mesBox  = document.querySelector('#mesbox')
+let active  = document.getElementById('active')
 
 
 function colorGen(lst = mesBox.children) {
@@ -149,11 +150,17 @@ function send() {
     ipcRenderer.send('form-submission', args[0], args[1], args[2], update.value === 'true' ? true : false)
 }
 
+let lastGames = []
+
 ipcRenderer.on('message', (event, arg) => {
     let id  = arg.id  || ''
     let txt = arg.txt || arg
     let p = document.createElement('p')
     p.textContent = id + promptTxt + txt
+    if (!id || id === '_') {
+        lastGames.push(parseFloat(txt))
+        if (active.value === 'true') parser.gamble(lastGames)     
+    }
     if (arg.start && mesBox.childElementCount > 0) {
         let first = mesBox.children[0]
         mesBox.insertBefore(p, first)
@@ -182,12 +189,138 @@ ipcRenderer.on('authDone', (event, arg) => {
     document.querySelector('.bet-calc').style.display = 'block'
 })
 
+let TOKEN
 
-function formParser() {
+ipcRenderer.on('token', (event, arg) => {
+    TOKEN = arg 
+})
+
+function Formula(cond) {
+    let ar = cond.split(',')    
+
+    this.conds = ar.map(e => {
+        let regcheck = /a\[(\d+)\]\s*([><=])\s*([0-9.])/
+        let match = regcheck.exec(e)
+        if (match) {
+            let op1     = parseInt(match[1])
+            let oper    = match[2]
+            let op2     = parseFloat(match[3])
+            if (isNaN(op1) || isNaN(op2)) alert('bad formula')
+            with (Math) {
+                if (op1 < 0) op1 = abs(op1 + 1)
+                else if (op1 > 0) op1 = op1 - 1
+            }
+            return [op1, oper, op2]
+        }
+        else alert('bad formula') 
+    })
+
+    if (this.conds.includes(undefined)) alert('bad formula')
+
+    this.check = (games) => {
+        return this.conds.every(e) => {
+            if (e[0] > games.length) return false 
+            if (e[1] == '<') {
+                if (games[games.length - e[0]] > e[2]) return false
+            }
+            else if (e[1] == '>') {
+                if (games[games.length - e[0]] < e[2]) return false
+            }
+            else if (e[1] == '=') {
+                if (games[games.length - e[0]] != e[2]) return false
+            }
+            return true
+        }
+    }    
+}
+
+function Gambler() {
     this.makeBet = (sum) => {
 
     }
-    this.addFormula = (str) => {
-        
+}
+
+let gambler = new Gambler()
+
+function formParser() {
+    this.stack = []
+
+    this.f = (cond) => {
+        let res = new Formula(cond)
+        if (!res) alert('bad formula')
+        else return res
     }
+
+    this.add = (txt, sum) => {
+        let fun = this.f(cond)
+        this.stack.push({sum: sum, f: fun})
+    }
+
+    this.changeF = (idx, cond) => {
+        this.stack[idx].f = this.f(cond)
+    }
+
+    this.changeS = (idx, col) => {
+        this.stack[idx].sum = sum
+    }
+
+    this.gamble(games) {
+        this.stuck.every(e => {
+            if (e.f.check(games)) {
+                gambler.makeBet(e.sum)
+                return false
+            }
+            return true
+        })
+    }
+}
+
+function formInput(txt, sum, idx) {
+    this.txt = txt
+    this.sum = sum
+    this.was = false
+    this.idx = idx
+    this.txt.onchange = () => {
+        if (!this.was && this.sum.value.length !== 0) {
+            formParser.add(this.txt.value, this.sum.value)
+            this.was = true
+        }
+        else if (this.was){
+            formParser.changeF(this.idx, this.txt.value)
+        }
+    }
+    this.sum.onchange = () => {
+        if (!this.was && this.txt.value.length !== 0) {
+            formParser.add(this.txt.value, this.sum.value)
+            this.was = true
+        }
+        else if (this.was){
+            formParser.changeS(this.idx, this.sum.value)
+        }
+    }
+}
+
+
+let parser       = new formParser()
+let betInputs    = []
+let bets         = document.querySelector('.bets')
+
+document.getElementById('addFormula').onclick = () => {
+    let div = document.createElement('div')
+    div.className = 'input-group'
+    let input1 = document.createElement('input')
+    input1.type = 'text'
+    input1.className = 'form-control'
+    input1.placeholder = 'e.g. a[1] <= 1.1, a[2] <= 1.2'
+    let input2 = document.createElement('input')
+    input2.type = 'text'
+    input2.className = 'form-control'
+    input2.placeholder = 'e.g. 1 or 1$'
+
+    let h = new formInput(input1, input2, betInputs.length)
+    betInputs.push(h)
+
+    div.appendChild(input1)
+    div.appendChild(input2)
+    bets.appendChild(div)
 }
