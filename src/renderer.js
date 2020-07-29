@@ -149,7 +149,6 @@ function send() {
     ipcRenderer.send('form-submission', args[0], args[1], args[2], update.value === 'true' ? true : false)
 }
 
-
 ipcRenderer.on('message', (event, arg) => {
     let id  = arg.id  || ''
     let txt = arg.txt || arg
@@ -172,3 +171,23 @@ ipcRenderer.on('count', (event, arg) => {
 ipcRenderer.on('error', (event, arg) => {
     alert(arg)
 })
+
+let authBtn = document.getElementById('auth')
+authBtn.onclick = (event) => {
+    event.preventDefault()
+    ipcRenderer.send('auth') 
+}
+
+ipcRenderer.on('authDone', (event, arg) => {
+    document.querySelector('.bet-calc').style.display = 'block'
+})
+
+
+function formParser() {
+    this.makeBet = (sum) => {
+
+    }
+    this.addFormula = (str) => {
+        
+    }
+}

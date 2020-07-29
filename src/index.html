@@ -22,7 +22,7 @@
                   <label for="fn">File name for result</label>
                   <p><input type="text" class="form-control" id="fn" value="res.txt"></p>
               </div>
-              <p class="checkbox"><input type="checkbox" value="true" id="update">UPDATE</p>
+              <p class="checkbox"><input type="checkbox" value="true" id="update" checked>UPDATE</p>
               <div class="type">
                   <button class="btn btn-primary" type="submit" id="subm">Scan games</button>
               </div>
@@ -31,12 +31,25 @@
               <p>ADD A COLOR FILTER <button id="addColor" class="btn btn-sm btn-outline-primary">+</button> 
           </div>
       </div>
-      <div class="res col-8">
+      <div class="res col-4">
           <div class="header">
             <p style="vertical-align: sub">MESSAGE BOX</p>
           </div>
           <p id="counter"></p>
           <div id="mesbox"></div>
+      </div>
+      <div class="col-4 bets">
+          <div class="header1">
+            <p style="vertical-align: sub;">BETS</p>
+          </div>
+          <div class="type"><button id="auth" class="btn btn-primary">SIGN IN VIA BROWSER</button></div>
+          <div class="type">
+              <div class="bet-calc">
+                  <div class="colors">
+                      <p>ADD A BET FORMULA <button id="addFormula" class="btn btn-sm btn-outline-primary">+</button> 
+                  </div>
+              </div>
+          </div>
       </div>
       </div>
       <script src='./renderer.js'></script>

@@ -5,7 +5,6 @@ const cheerio       = require('cheerio')
 const fs            = require('fs')
 const Promise       = require('bluebird')
 const realTime      = require('./realTime.js')
-const auth          = require('./auth.js')
 
 let concur = 1
 let log = fs.createWriteStream('res.txt')

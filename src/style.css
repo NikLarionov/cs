@@ -71,3 +71,25 @@ body {
     font-size: 13px;
     padding-left: 10px;
 }
+
+.header1 {
+    backgroud: white;
+    height: 25px;
+    color: black;     
+    border: 2px solid black;
+    border-left: 0;
+    margin-bottom: 30px;
+}
+
+.bets {
+    padding: 0;
+    text-align: center;
+    height: 100%;
+    border: 5px solid black;
+    border-left: 0px;
+    padding: 0;
+}
+
+.bet-calc {
+    display: none;
+}

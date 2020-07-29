@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { app, BrowserWindow, ipcMain } from 'electron';
-const domath = require('./server.js')
+const server = require('./server.js')
 const fs     = require('fs')
+const auth   = require('./auth.js')
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -15,7 +16,7 @@ let mainWindow;
 const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 700,
+    width: 900,
     height: 850,
     webPreferences: {
         nodeIntegration: true
@@ -37,11 +38,17 @@ const createWindow = () => {
 
 ipcMain.on('form-submission', function (event, n, ms, fn, update=false) {
     console.log(n, ms, fn)
-    domath.log = fs.createWriteStream(fn)
-    domath.getLastRes(event, parseInt(n), parseInt(ms), update).then(e => {
+    server.log = fs.createWriteStream(fn)
+    server.getLastRes(event, parseInt(n), parseInt(ms), update).then(e => {
     }).catch(console.error)
 
 });
+
+ipcMain.on('auth', event => {
+    auth.getToken(server.api, token => {
+        event.reply('message', 'got token' + token)
+    }) 
+})
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
