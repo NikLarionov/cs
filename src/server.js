@@ -113,7 +113,7 @@ let getLastRes = async (event, n, ms, trace=false) => {
 }
 
 /* BAD FUNCTIONS */
-let betReq = async (token, items, cashout) => {
+let makeBet = async (token, items, cashout) => {
     return api('/make-bet', {
         method: 'post',
         headers: {
@@ -125,15 +125,15 @@ let betReq = async (token, items, cashout) => {
         }
     })
 }
-let makeBet = (items, cashout) => {
-    if (auth.token) {
-        return betReq(auth.token, items, cashout)
-    }
-    else {
-        auth.getToken(api, token => {
-            return betReq(token, items, cashout)
-        })
-    }
+
+let getItems = async (token) => {
+    return api.get('/current-state', {
+        headers: {
+            Authorization: token
+        }
+    }).then(resp => {
+        return resp.data.data.user.items
+    })
 }
 
 function main() {
@@ -151,17 +151,9 @@ function main() {
     }
 }
 
-
 if (require.main === module) {
     let token = 'JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAwMTA1LCJpYXQiOjE1OTU3ODE5NzksImV4cCI6MTYwMDk2NTk3OX0.X25xyCaaXy_CpMEs1pWkrhu0c4VkwJAieRFzQt2ntlk'
-    api.get('/current-state', {
-        headers: {
-            Authorization: token
-        }
-    }).then(resp => {
-        console.log(resp.data.data.user.items)
-    })
-    betReq(token, [188908280], '1.1').then(console.log).catch(console.error)
+    makeBet(token, [188908280], '1.1').then(console.log).catch(console.error)
 }
 else {
     module.exports.getLastRes = getLastRes
@@ -170,6 +162,6 @@ else {
     module.exports.profile = profile
     module.exports.log = log
     module.exports.lastGames = lastGames
-
-
+    module.exports.getItems = getItems
+    module.exports.makeBet = makeBet
 }

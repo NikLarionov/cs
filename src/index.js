@@ -44,12 +44,23 @@ ipcMain.on('form-submission', function (event, n, ms, fn, update=false) {
 
 });
 
+let TOKEN
+
 ipcMain.on('auth', event => {
     auth.getToken(server.api, token => {
         event.reply('message', 'got token' + token)
         event.reply('authDone')
         event.reply('token', token)
+        TOKEN = token
     }) 
+})
+
+ipcMain.on('getItems', event => {
+    server.getItems(TOKEN).then(e => event.reply('gotItems', e))
+})
+
+ipcMain.on('makeBet', (ids, cout) => {
+    server.makeBet(token, ids, cout).then(e => event.reply('madeBet'))
 })
 
 // This method will be called when Electron has finished

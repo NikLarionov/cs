@@ -193,10 +193,30 @@ let TOKEN
 
 ipcRenderer.on('token', (event, arg) => {
     TOKEN = arg 
+    console.log(TOKEN)
 })
 
 function Formula(cond) {
-    let ar = cond.split(',')    
+    cond = cond.split('->')
+    if (cond.length < 2) {
+        alert('bad formula')
+    }
+    this.res = cond[1]
+    if (!isNaN(parseFloat(this.res))) {
+        this.res = parseFloat(this.res)
+        this.useIdx = false
+    }
+    else {
+        let regx = /a\[(\d+)\]/
+        let match = regx.exec(this.res)
+        if (match) {
+            this.useIdx = true
+            this.res = parseInt(match[1])
+            if (this.res < 0) this.res = -1*(this.res + 1)
+            else if (this.res > 0) this.res = this.res - 1
+        }
+    }
+    let ar = cond[0].split(',')    
 
     this.conds = ar.map(e => {
         let regcheck = /a\[(\d+)\]\s*([><=])\s*([0-9.])/
@@ -206,10 +226,8 @@ function Formula(cond) {
             let oper    = match[2]
             let op2     = parseFloat(match[3])
             if (isNaN(op1) || isNaN(op2)) alert('bad formula')
-            with (Math) {
-                if (op1 < 0) op1 = abs(op1 + 1)
-                else if (op1 > 0) op1 = op1 - 1
-            }
+            if (op1 < 0) op1 = -1*(op1 + 1)
+            else if (op1 > 0) op1 = op1 - 1
             return [op1, oper, op2]
         }
         else alert('bad formula') 
@@ -218,7 +236,7 @@ function Formula(cond) {
     if (this.conds.includes(undefined)) alert('bad formula')
 
     this.check = (games) => {
-        return this.conds.every(e) => {
+        let ok = this.conds.every(e => {
             if (e[0] > games.length) return false 
             if (e[1] == '<') {
                 if (games[games.length - e[0]] > e[2]) return false
@@ -230,17 +248,26 @@ function Formula(cond) {
                 if (games[games.length - e[0]] != e[2]) return false
             }
             return true
+        })
+        if (ok) {
+            if (this.useIdx) {
+                if (this.res > games.length) return false
+                return games[this.res]
+            }
+        }
+        else {
+            return false
         }
     }    
 }
 
-function Gambler() {
-    this.makeBet = (sum) => {
-
-    }
+let makeBet = (sum, cout) => {
+    ipcRenderer.send('getItems')
+    ipcRenderer.on('gotItems', (event, items) => {
+        console.log(items)
+        //ipcRenderer.send('makeBet', ids, '1.1')
+    })
 }
-
-let gambler = new Gambler()
 
 function formParser() {
     this.stack = []
@@ -264,10 +291,11 @@ function formParser() {
         this.stack[idx].sum = sum
     }
 
-    this.gamble(games) {
+    this.gamble = (games) => {
         this.stuck.every(e => {
-            if (e.f.check(games)) {
-                gambler.makeBet(e.sum)
+            let res = e.f.check(games)
+            if (res) {
+                makeBet(e.sum, res)
                 return false
             }
             return true
@@ -311,7 +339,7 @@ document.getElementById('addFormula').onclick = () => {
     let input1 = document.createElement('input')
     input1.type = 'text'
     input1.className = 'form-control'
-    input1.placeholder = 'e.g. a[1] <= 1.1, a[2] <= 1.2'
+    input1.placeholder = 'e.g. a[1] <= 1.1, a[2] <= 1.2 -> 1.1'
     let input2 = document.createElement('input')
     input2.type = 'text'
     input2.className = 'form-control'
