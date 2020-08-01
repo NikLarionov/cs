@@ -72,8 +72,13 @@ let getLastRes = async (event, n, ms, trace=false) => {
         console.log('connected to host')
         let token = res.data.data.centrifugeToken
         if (trace) realTime.traceGames(token, e => {
-            lastGames.push(e)
-            event.reply('message', {id: '_', txt: e, start: true})
+            if (e === 'start') {
+                event.reply('gameStarted')
+            }
+            else {
+                lastGames.push(e)
+                event.reply('message', {id: '_', txt: e, start: true})
+            }
         })
         event.reply('message', 'connected to host')
         hist = res.data.data.game.history
@@ -114,19 +119,23 @@ let getLastRes = async (event, n, ms, trace=false) => {
 
 /* BAD FUNCTIONS */
 let makeBet = async (token, items, cashout) => {
-    return api('/make-bet', {
-        method: 'post',
-        headers: {
-            'Authorization': token
-        },
-        data: {
-            userItemIds: items,
-            auto: cashout
-        }
+    console.log('makeBet')
+    return delay(2000).then(_ => {
+        return api('/make-bet', {
+                method: 'post',
+                headers: {
+                    'Authorization': token
+                },
+                data: {
+                    userItemIds: items,
+                    auto: cashout.toString()
+                }
+            }).catch(console.error)
     })
 }
 
 let getItems = async (token) => {
+    console.log('getItems')
     return api.get('/current-state', {
         headers: {
             Authorization: token

@@ -42,6 +42,9 @@ let traceGames = (token, cb) => {
                     //console.log(game.c)
                     cb(game.c)
                 }
+                else if (game.type === 'start') {
+                    cb('start')
+                }
             }
         })
     })

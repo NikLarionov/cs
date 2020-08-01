@@ -16,7 +16,7 @@ let mainWindow;
 const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 900,
+    width: 950,
     height: 850,
     webPreferences: {
         nodeIntegration: true
@@ -44,7 +44,9 @@ ipcMain.on('form-submission', function (event, n, ms, fn, update=false) {
 
 });
 
-let TOKEN
+//let TOKEN
+//let TOKEN = 'JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAwMTA1LCJpYXQiOjE1OTYxOTgwNTgsImV4cCI6MTYwMTM4MjA1OH0.g1nWT-2oWPCFRsQGd453Tddlm3Z-8q4doxC4L2HvFzM'
+let TOKEN = 'JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTAwMTA1LCJpYXQiOjE1OTYyMjU0NjAsImV4cCI6MTYwMTQwOTQ2MH0.n1KfHgTdowwWHI-6uhGhKmctkqJF1c8XnXoc9wAIuuI'
 
 ipcMain.on('auth', event => {
     auth.getToken(server.api, token => {
@@ -55,12 +57,15 @@ ipcMain.on('auth', event => {
     }) 
 })
 
-ipcMain.on('getItems', event => {
+ipcMain.on('getItems', (event) => {
     server.getItems(TOKEN).then(e => event.reply('gotItems', e))
 })
 
-ipcMain.on('makeBet', (ids, cout) => {
-    server.makeBet(token, ids, cout).then(e => event.reply('madeBet'))
+ipcMain.on('makeBet', (event, ids, cout) => {
+    server.makeBet(TOKEN, ids, cout).then(e => {
+        event.reply('madeBet')
+        event.reply('message', `made bet with ${ids.length} items and ${cout} cashout`)
+    })
 })
 
 // This method will be called when Electron has finished

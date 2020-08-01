@@ -73,7 +73,6 @@ function colorGen(lst = mesBox.children) {
     }
 
     this.gen = (p) => {
-        console.log(this.stack.length)
         let x = parseInt(p.textContent.split(promptTxt)[1])
         this.stack.forEach(e => {
             if (e.f(x)) {
@@ -147,7 +146,7 @@ function send() {
         alert('Bad Arguments ;(')
         return
     }
-    ipcRenderer.send('form-submission', args[0], args[1], args[2], update.value === 'true' ? true : false)
+    ipcRenderer.send('form-submission', args[0], args[1], args[2], update.checked)
 }
 
 let lastGames = []
@@ -157,9 +156,12 @@ ipcRenderer.on('message', (event, arg) => {
     let txt = arg.txt || arg
     let p = document.createElement('p')
     p.textContent = id + promptTxt + txt
-    if (!id || id === '_') {
+    if (id === '_') {
         lastGames.push(parseFloat(txt))
-        if (active.value === 'true') parser.gamble(lastGames)     
+        if (active.checked) {
+            console.log('checking')
+            parser.gamble(lastGames)     
+        }
     }
     if (arg.start && mesBox.childElementCount > 0) {
         let first = mesBox.children[0]
@@ -236,6 +238,7 @@ function Formula(cond) {
     if (this.conds.includes(undefined)) alert('bad formula')
 
     this.check = (games) => {
+        console.log(games)
         let ok = this.conds.every(e => {
             if (e[0] > games.length) return false 
             if (e[1] == '<') {
@@ -249,10 +252,14 @@ function Formula(cond) {
             }
             return true
         })
+        console.log("OK: " + ok)
         if (ok) {
             if (this.useIdx) {
                 if (this.res > games.length) return false
                 return games[this.res]
+            }
+            else {
+                return this.res
             }
         }
         else {
@@ -262,12 +269,35 @@ function Formula(cond) {
 }
 
 let makeBet = (sum, cout) => {
+    console.log('IN MAKGEBET')
     ipcRenderer.send('getItems')
-    ipcRenderer.on('gotItems', (event, items) => {
+    ipcRenderer.once('gotItems', (event, items) => {
+        let ids = []
+        let curSum = 0
+        items.sort((a, b) => {
+            if (a.price < b.price) return -1
+            if (a.price > b.price) return 1
+            return 0
+        })
+        items.every(e => {
+            if (curSum >= sum) return false
+            curSum += e.price
+            ids.push(e.id)
+            return true
+        })
         console.log(items)
-        //ipcRenderer.send('makeBet', ids, '1.1')
+        if (curSum == 0) {
+            alert("no items ;(")
+        }
+        else {
+            ipcRenderer.once('gameStarted', (event) => {
+                console.log('making bet')
+                ipcRenderer.send('makeBet', ids, cout)
+            })
+        }
     })
 }
+
 
 function formParser() {
     this.stack = []
@@ -279,7 +309,7 @@ function formParser() {
     }
 
     this.add = (txt, sum) => {
-        let fun = this.f(cond)
+        let fun = this.f(txt)
         this.stack.push({sum: sum, f: fun})
     }
 
@@ -292,9 +322,12 @@ function formParser() {
     }
 
     this.gamble = (games) => {
-        this.stuck.every(e => {
+        console.log('gamblig')
+        this.stack.every(e => {
             let res = e.f.check(games)
+            console.log(res)
             if (res) {
+                console.log('GAMBLE: making bet')
                 makeBet(e.sum, res)
                 return false
             }
@@ -310,20 +343,20 @@ function formInput(txt, sum, idx) {
     this.idx = idx
     this.txt.onchange = () => {
         if (!this.was && this.sum.value.length !== 0) {
-            formParser.add(this.txt.value, this.sum.value)
+            parser.add(this.txt.value, this.sum.value)
             this.was = true
         }
         else if (this.was){
-            formParser.changeF(this.idx, this.txt.value)
+            parser.changeF(this.idx, this.txt.value)
         }
     }
     this.sum.onchange = () => {
         if (!this.was && this.txt.value.length !== 0) {
-            formParser.add(this.txt.value, this.sum.value)
+            parser.add(this.txt.value, this.sum.value)
             this.was = true
         }
         else if (this.was){
-            formParser.changeS(this.idx, this.sum.value)
+            parser.changeS(this.idx, this.sum.value)
         }
     }
 }
